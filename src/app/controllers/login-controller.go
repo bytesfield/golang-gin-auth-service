@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	"github.com/bytesfield/golang-gin-auth-service/src/api/models"
-	"github.com/bytesfield/golang-gin-auth-service/src/api/responses"
-	"github.com/bytesfield/golang-gin-auth-service/src/api/services"
+	"github.com/bytesfield/golang-gin-auth-service/src/app/models"
+	"github.com/bytesfield/golang-gin-auth-service/src/app/responses"
+	"github.com/bytesfield/golang-gin-auth-service/src/app/services"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )

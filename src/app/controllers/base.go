@@ -11,8 +11,8 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"github.com/bytesfield/golang-gin-auth-service/src/api/middlewares"
-	"github.com/bytesfield/golang-gin-auth-service/src/api/models"
+	"github.com/bytesfield/golang-gin-auth-service/src/app/middlewares"
+	"github.com/bytesfield/golang-gin-auth-service/src/app/models"
 	gin "github.com/gin-gonic/gin"
 )
 

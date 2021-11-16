@@ -4,7 +4,7 @@ import (
 	"log"
 	"testing"
 
-	"github.com/bytesfield/golang-gin-auth-service/src/api/models"
+	"github.com/bytesfield/golang-gin-auth-service/src/app/models"
 	"github.com/jaswdr/faker"
 	"gopkg.in/go-playground/assert.v1"
 	_ "gorm.io/driver/mysql"

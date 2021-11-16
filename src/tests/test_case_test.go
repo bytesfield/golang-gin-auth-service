@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bytesfield/golang-gin-auth-service/src/api/controllers"
-	"github.com/bytesfield/golang-gin-auth-service/src/api/models"
+	"github.com/bytesfield/golang-gin-auth-service/src/app/controllers"
+	"github.com/bytesfield/golang-gin-auth-service/src/app/models"
 	"github.com/jaswdr/faker"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"

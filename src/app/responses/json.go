@@ -62,7 +62,7 @@ func NoContent(c *gin.Context, message string, data ...interface{}) {
 	BuildResponse(c, false, message, http.StatusNoContent, data)
 }
 
-func BuildResponse(c *gin.Context, status bool, message string, statusCode int, data interface{}) {
+func BuildResponse(c *gin.Context, status bool, message string, statusCode int, data ...interface{}) {
 
 	if reflect.DeepEqual(data, reflect.Zero(reflect.TypeOf(data)).Interface()) {
 

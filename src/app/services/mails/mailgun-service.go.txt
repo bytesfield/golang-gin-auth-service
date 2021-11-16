@@ -1,0 +1,68 @@
+package mails
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+	"time"
+
+	"github.com/mailgun/mailgun-go/v4"
+)
+
+type mailgunSend struct {
+	sender       string
+	recipient    string
+	mailSubject  string
+	mailTemplate string
+}
+
+func (ms *mailgunSend) to(email string) *mailgunSend {
+	ms.sender = email
+	return ms
+}
+
+func (ms *mailgunSend) from(email string) *mailgunSend {
+	ms.recipient = email
+	return ms
+}
+
+func (ms *mailgunSend) subject(subject string) *mailgunSend {
+	ms.mailSubject = subject
+	return ms
+}
+
+func (ms *mailgunSend) template(template string) *mailgunSend {
+	ms.mailTemplate = template
+	return ms
+}
+
+func (ms *mailgunSend) send() {
+	// Create an instance of the Mailgun Client
+	mg := mailgun.NewMailgun(os.Getenv("MAILGUN_DOMAIN"), os.Getenv("MAILGUN_API_KEY"))
+
+	sender := ms.sender
+	subject := ms.mailSubject
+	body := ""
+	recipient := ms.recipient
+
+	// The message object allows you to add attachments and Bcc recipients
+	message := mg.NewMessage(sender, subject, body, recipient)
+	message.SetTemplate(ms.mailTemplate)
+	err := message.AddTemplateVariable("passwordResetLink", "some link to your site unique to your user")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	// Send the message with a 10 second timeout
+	resp, id, err := mg.Send(ctx, message)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("ID: %s Resp: %s\n", id, resp)
+}

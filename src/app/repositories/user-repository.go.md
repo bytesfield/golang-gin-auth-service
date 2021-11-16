@@ -6,7 +6,7 @@ import (
 "log"
 "time"
 
-    "github.com/bytesfield/golang-gin-auth-service/src/api/models"
+    "github.com/bytesfield/golang-gin-auth-service/src/app/models"
     "gorm.io/gorm"
 
 )

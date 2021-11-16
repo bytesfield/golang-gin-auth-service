@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"github.com/bytesfield/golang-gin-auth-service/src/api/responses"
+	"github.com/bytesfield/golang-gin-auth-service/src/app/responses"
 	gin "github.com/gin-gonic/gin"
 )
 

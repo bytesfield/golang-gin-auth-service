@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/bytesfield/golang-gin-auth-service/src/api/models"
+	"github.com/bytesfield/golang-gin-auth-service/src/app/models"
 	"github.com/jaswdr/faker"
 	"gorm.io/gorm"
 )
