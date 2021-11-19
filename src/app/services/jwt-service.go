@@ -21,7 +21,7 @@ func CreateToken(user_id uint32) (string, error) {
 
 	claims["authorized"] = true
 	claims["user_id"] = user_id
-	claims["exp"] = time.Now().Add(time.Hour * 1).Unix() //Token expires after 1 hour
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix() //Token expires after 5 mins
 
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 
@@ -35,40 +35,8 @@ func CreateToken(user_id uint32) (string, error) {
 }
 
 func VerifyToken(ctx *gin.Context) error {
-	tokenString, err := GetToken(ctx)
 
-	if err != nil {
-		return err
-	}
-
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-
-		return []byte(os.Getenv("JWT_SECRET")), nil
-	})
-
-	if err != nil {
-		if err == jwt.ErrSignatureInvalid {
-			err := errors.New("invalid Signature")
-
-			ctx.AbortWithStatus(http.StatusBadRequest)
-
-			return err
-		}
-		return err
-	}
-
-	// Check if the token is valid.
-	if !token.Valid {
-		err := errors.New("the token is not valid")
-
-		ctx.AbortWithStatus(http.StatusBadRequest)
-
-		return err
-	}
+	token, _ := ParseToken(ctx)
 
 	//Extract key value from the token and print them on console
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
@@ -118,30 +86,12 @@ func GetToken(ctx *gin.Context) (string, error) {
 }
 
 func GetTokenID(ctx *gin.Context) (uint32, error) {
-
-	tokenString, err := GetToken(ctx)
-
-	if err != nil {
-		return 0, err
-	}
-
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-
-		return []byte(os.Getenv("API_SECRET")), nil
-	})
-
-	if err != nil {
-		return 0, err
-	}
+	token, _ := ParseToken(ctx)
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 
 	if ok && token.Valid {
-		uid, err := strconv.ParseUint(fmt.Sprintf("%.0f", claims["user_id"]), 10, 32)
+		uid, err := strconv.ParseUint(fmt.Sprintf("%v", claims["user_id"]), 10, 32)
 
 		if err != nil {
 			return 0, err
@@ -150,6 +100,77 @@ func GetTokenID(ctx *gin.Context) (uint32, error) {
 	}
 
 	return 0, nil
+}
+
+func RefreshToken(ctx *gin.Context) (string, error) {
+	token, _ := ParseToken(ctx)
+
+	claims, _ := token.Claims.(jwt.MapClaims)
+
+	expiredAt, err := strconv.ParseInt(fmt.Sprintf("%.0f", claims["exp"]), 10, 64)
+
+	if err != nil {
+		return "", err
+	}
+
+	if time.Unix(expiredAt, 0).Sub(time.Now()) > 30*time.Second {
+		err := errors.New("token can not be refreshed now")
+
+		ctx.AbortWithStatus(http.StatusBadRequest)
+
+		return "", err
+
+	}
+
+	//uid, err := strconv.ParseUint(fmt.Sprintf("%.0f", claims["user_id"]), 10, 32)
+	uid, err := strconv.ParseUint(fmt.Sprintf("%v", claims["user_id"]), 10, 32)
+
+	if err != nil {
+		return "", err
+	}
+
+	return CreateToken(uint32(uid))
+
+}
+
+func ParseToken(ctx *gin.Context) (*jwt.Token, error) {
+
+	tokenString, err := GetToken(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return []byte(os.Getenv("JWT_SECRET")), nil
+	})
+
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			err := errors.New("invalid Signature")
+
+			ctx.AbortWithStatus(http.StatusBadRequest)
+
+			return nil, err
+		}
+		return nil, err
+	}
+
+	// Check if the token is valid.
+	if !token.Valid {
+		err := errors.New("the token is not valid")
+
+		ctx.AbortWithStatus(http.StatusBadRequest)
+
+		return nil, err
+	}
+
+	return token, err
 }
 
 //Pretty display the claims nicely in the terminal

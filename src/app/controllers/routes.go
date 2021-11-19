@@ -13,8 +13,9 @@ func (s *Server) initializeRoutes() {
 
 	api := s.Router.Group("/api/v1")
 	{
-		// // Login Route
+		// // Auth Route
 		api.POST("/login", s.Login)
+		api.POST("/token/refresh", middlewares.AuthMiddleware(), s.RefreshToken)
 		// //Users routes
 		api.POST("/register", s.Register)
 		api.GET("/users", middlewares.AuthMiddleware(), s.GetUsers)
