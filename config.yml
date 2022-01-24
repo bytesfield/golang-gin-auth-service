@@ -5,12 +5,12 @@ database:
   dbhost: "127.0.0.1"
   dbdriver: "mysql"
   dbport: "3306"
-  dbname: "golang_auth"
-  dbuser: "root"
-  dbpassword: "root"
+  dbname: ""
+  dbuser: ""
+  dbpassword: ""
 
-MAILGUN_API_KEY: "key-413c897d7034116b772341f28034ec54"
-MAILGUN_DOMAIN: "mg.farmeasy.com.ng"
+MAILGUN_API_KEY: ""
+MAILGUN_DOMAIN: ""
 
-JWT_SECRET:  "mySecret"
+JWT_SECRET:  ""
 
