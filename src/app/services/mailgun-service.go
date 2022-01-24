@@ -1,4 +1,4 @@
-package mails
+package services
 
 import (
 	"context"
@@ -10,49 +10,46 @@ import (
 	"github.com/mailgun/mailgun-go/v4"
 )
 
-type mailgunSend struct {
+type MailgunSend struct {
 	sender       string
 	recipient    string
 	mailSubject  string
 	mailTemplate string
 }
 
-func (ms *mailgunSend) to(email string) *mailgunSend {
+func (ms *MailgunSend) To(email string) *MailgunSend {
 	ms.sender = email
 	return ms
 }
 
-func (ms *mailgunSend) from(email string) *mailgunSend {
+func (ms *MailgunSend) From(email string) *MailgunSend {
 	ms.recipient = email
 	return ms
 }
 
-func (ms *mailgunSend) subject(subject string) *mailgunSend {
+func (ms *MailgunSend) Subject(subject string) *MailgunSend {
 	ms.mailSubject = subject
 	return ms
 }
 
-func (ms *mailgunSend) template(template string) *mailgunSend {
+func (ms *MailgunSend) Template(template string) *MailgunSend {
 	ms.mailTemplate = template
 	return ms
 }
 
-func (ms *mailgunSend) send() {
+func (ms *MailgunSend) Send() {
 	// Create an instance of the Mailgun Client
 	mg := mailgun.NewMailgun(os.Getenv("MAILGUN_DOMAIN"), os.Getenv("MAILGUN_API_KEY"))
 
-	sender := ms.sender
-	subject := ms.mailSubject
-	body := ""
-	recipient := ms.recipient
-
 	// The message object allows you to add attachments and Bcc recipients
-	message := mg.NewMessage(sender, subject, body, recipient)
-	message.SetTemplate(ms.mailTemplate)
-	err := message.AddTemplateVariable("passwordResetLink", "some link to your site unique to your user")
-	if err != nil {
-		log.Fatal(err)
-	}
+	message := mg.NewMessage(ms.sender, ms.mailSubject, ms.mailTemplate, ms.recipient)
+
+	// message.SetTemplate(ms.mailTemplate)
+	// err := message.AddTemplateVariable("passwordResetLink", "some link to your site unique to your user")
+
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()

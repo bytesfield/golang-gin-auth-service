@@ -3,7 +3,6 @@ package middlewares
 import (
 	"net/http"
 
-	"github.com/bytesfield/golang-gin-auth-service/src/app/responses"
 	"github.com/bytesfield/golang-gin-auth-service/src/app/services"
 	"github.com/gin-gonic/gin"
 )
@@ -20,11 +19,8 @@ func AuthMiddleware() gin.HandlerFunc {
 		err := services.VerifyToken(ctx)
 
 		if err != nil {
-			ctx.Abort()
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 
-			responses.BuildResponse(ctx, false, err.Error(), http.StatusUnauthorized)
-
-			return
 		}
 
 		ctx.Next()

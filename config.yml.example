@@ -1,0 +1,16 @@
+server:
+  port: 8080
+
+database:
+  dbhost: "127.0.0.1"
+  dbdriver: "mysql"
+  dbport: "3306"
+  dbname: ""
+  dbuser: ""
+  dbpassword: ""
+
+MAILGUN_API_KEY: ""
+MAILGUN_DOMAIN: ""
+
+JWT_SECRET:  ""
+

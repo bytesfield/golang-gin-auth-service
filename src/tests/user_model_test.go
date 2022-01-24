@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/bytesfield/golang-gin-auth-service/src/app/models"
+	userRepository "github.com/bytesfield/golang-gin-auth-service/src/app/repositories"
 	"github.com/jaswdr/faker"
 	"gopkg.in/go-playground/assert.v1"
 	_ "gorm.io/driver/mysql"
@@ -21,7 +22,9 @@ func TestFindAllUsers(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	users, err := userInstance.FindAllUsers(server.DB)
+	userRepo := userRepository.New(&userInstance)
+
+	users, err := userRepo.FindAllUsers(server.DB)
 
 	if err != nil {
 		t.Errorf("error getting the users: %v\n", err)
@@ -45,7 +48,9 @@ func TestSaveUser(t *testing.T) {
 		Password:  "password",
 	}
 
-	savedUser, err := newUser.SaveUser(server.DB)
+	userRepo := userRepository.New(&userInstance)
+
+	savedUser, err := userRepo.SaveUser(server.DB)
 
 	if err != nil {
 		t.Errorf("error getting the users: %v\n", err)
@@ -66,8 +71,9 @@ func TestGetUserByID(t *testing.T) {
 	if err != nil {
 		log.Fatalf("cannot seed users table: %v", err)
 	}
+	userRepo := userRepository.New(&userInstance)
 
-	foundUser, err := userInstance.FindUserByID(server.DB, uint32(user.ID))
+	foundUser, err := userRepo.FindUserByID(server.DB, uint32(user.ID))
 
 	if err != nil {
 		t.Errorf("error getting one user: %v\n", err)
@@ -98,7 +104,9 @@ func TestUpdateAUser(t *testing.T) {
 		Nickname:  faker.Person().FirstName(),
 		Password:  "password",
 	}
-	updatedUser, err := userUpdate.UpdateAUser(server.DB, uint32(user.ID))
+	userRepo := userRepository.New(&userInstance)
+
+	updatedUser, err := userRepo.UpdateUser(server.DB, uint32(user.ID))
 
 	if err != nil {
 		t.Errorf("error updating the user: %v\n", err)
@@ -119,7 +127,9 @@ func TestDeleteAUser(t *testing.T) {
 		log.Fatalf("Cannot seed user: %v\n", err)
 	}
 
-	isDeleted, err := userInstance.DeleteAUser(server.DB, uint32(user.ID))
+	userRepo := userRepository.New(&userInstance)
+
+	isDeleted, err := userRepo.DeleteUser(server.DB, uint32(user.ID))
 
 	if err != nil {
 		t.Errorf("error updating the user: %v\n", err)

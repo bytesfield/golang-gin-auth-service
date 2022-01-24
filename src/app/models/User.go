@@ -3,7 +3,6 @@ package models
 import (
 	"errors"
 	"html"
-	"log"
 	"strings"
 	"time"
 
@@ -29,7 +28,7 @@ func VerifyPassword(hashedPassword, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
 
-func (u *User) BeforeSave() error {
+func (u *User) BeforeSave(*gorm.DB) error {
 	hashedPassword, err := Hash(u.Password)
 	if err != nil {
 		return err
@@ -51,129 +50,50 @@ func (u *User) Validate(action string) error {
 	switch strings.ToLower(action) {
 	case "update":
 		if u.Firstname == "" {
-			return errors.New("required firstname")
+			return errors.New("firstname required")
 		}
 		if u.Lastname == "" {
-			return errors.New("required lastname")
+			return errors.New("lastname required")
 		}
 		if u.Password == "" {
-			return errors.New("required password")
+			return errors.New("password required")
 		}
 		if u.Email == "" {
-			return errors.New("required Email")
+			return errors.New("email required")
 		}
 		if err := checkmail.ValidateFormat(u.Email); err != nil {
-			return errors.New("invalid email")
+			return errors.New("invalid email format")
 		}
 
 		return nil
 	case "login":
 		if u.Password == "" {
-			return errors.New("required Password")
+			return errors.New("password required")
 		}
 		if u.Email == "" {
-			return errors.New("required email")
+			return errors.New("email required")
 		}
 		if err := checkmail.ValidateFormat(u.Email); err != nil {
-			return errors.New("invalid email")
+			return errors.New("invalid email format")
 		}
 		return nil
 
 	default:
 		if u.Firstname == "" {
-			return errors.New("required firstname")
+			return errors.New("firstname required")
 		}
 		if u.Lastname == "" {
-			return errors.New("required lastname")
+			return errors.New("lastname required")
 		}
 		if u.Password == "" {
-			return errors.New("required password")
+			return errors.New("password required")
 		}
 		if u.Email == "" {
-			return errors.New("required email")
+			return errors.New("email required")
 		}
 		if err := checkmail.ValidateFormat(u.Email); err != nil {
-			return errors.New("invalid email")
+			return errors.New("invalid email format")
 		}
 		return nil
 	}
-}
-
-func (u *User) SaveUser(db *gorm.DB) (*User, error) {
-
-	var err error
-
-	err = u.BeforeSave()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = db.Debug().Create(&u).Error
-	if err != nil {
-		return &User{}, err
-	}
-	return u, nil
-}
-
-func (u *User) FindAllUsers(db *gorm.DB) (*User, error) {
-
-	users := User{}
-
-	var err error = db.Debug().Model(&User{}).Limit(100).Find(&users).Error
-
-	if err != nil {
-		return &User{}, err
-	}
-	return &users, err
-}
-
-func (u *User) FindUserByID(db *gorm.DB, uid uint32) (*User, error) {
-	var err error = db.Debug().Model(User{}).Where("id = ?", uid).Take(&u).Error
-
-	if err != nil {
-		return &User{}, err
-	}
-	// if gorm.IsRecordNotFoundError(err) {
-	// 	return &User{}, errors.New("User Not Found")
-	// }
-	return u, err
-}
-
-func (u *User) UpdateAUser(db *gorm.DB, uid uint32) (*User, error) {
-
-	// To hash the password
-	err := u.BeforeSave()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-	db = db.Debug().Model(&User{}).Where("id = ?", uid).Take(&User{}).UpdateColumns(
-		map[string]interface{}{
-			"password":   u.Password,
-			"firstname":  u.Firstname,
-			"lastname":   u.Lastname,
-			"email":      u.Email,
-			"updated_at": time.Now(),
-		},
-	)
-	if db.Error != nil {
-		return &User{}, db.Error
-	}
-	// This is the display the updated user
-	err = db.Debug().Model(&User{}).Where("id = ?", uid).Take(&u).Error
-	if err != nil {
-		return &User{}, err
-	}
-	return u, nil
-}
-
-func (u *User) DeleteAUser(db *gorm.DB, uid uint32) (int64, error) {
-
-	db = db.Debug().Model(&User{}).Where("id = ?", uid).Take(&User{}).Delete(&User{})
-
-	if db.Error != nil {
-		return 0, db.Error
-	}
-	return db.RowsAffected, nil
 }

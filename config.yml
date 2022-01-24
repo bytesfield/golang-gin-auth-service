@@ -1,0 +1,16 @@
+server:
+  port: 8080
+
+database:
+  dbhost: "127.0.0.1"
+  dbdriver: "mysql"
+  dbport: "3306"
+  dbname: "golang_auth"
+  dbuser: "root"
+  dbpassword: "root"
+
+MAILGUN_API_KEY: "key-413c897d7034116b772341f28034ec54"
+MAILGUN_DOMAIN: "mg.farmeasy.com.ng"
+
+JWT_SECRET:  "mySecret"
+

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -21,7 +20,7 @@ func CreateToken(user_id uint32) (string, error) {
 
 	claims["authorized"] = true
 	claims["user_id"] = user_id
-	claims["exp"] = time.Now().Add(time.Hour * 1).Unix() //Token expires after 5 mins
+	claims["exp"] = time.Now().Add(time.Minute * 30).Unix() //Token expires after 30 mins
 
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 
@@ -36,7 +35,11 @@ func CreateToken(user_id uint32) (string, error) {
 
 func VerifyToken(ctx *gin.Context) error {
 
-	token, _ := ParseToken(ctx)
+	token, err := ParseToken(ctx)
+
+	if err != nil {
+		return err
+	}
 
 	//Extract key value from the token and print them on console
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
@@ -52,8 +55,6 @@ func GetToken(ctx *gin.Context) (string, error) {
 	if len(authorizationHeader) == 0 {
 		err := errors.New("authorization header is not provided")
 
-		ctx.AbortWithStatus(http.StatusBadRequest)
-
 		return "", err
 	}
 
@@ -63,8 +64,6 @@ func GetToken(ctx *gin.Context) (string, error) {
 
 		err := errors.New("invalid Authorization header format")
 
-		ctx.AbortWithStatus(http.StatusBadRequest)
-
 		return "", err
 	}
 
@@ -73,8 +72,6 @@ func GetToken(ctx *gin.Context) (string, error) {
 	if strings.ToLower(authorizationType) != "bearer" {
 
 		err := errors.New("unsupported authorization type")
-
-		ctx.AbortWithStatus(http.StatusBadRequest)
 
 		return "", err
 
@@ -113,16 +110,13 @@ func RefreshToken(ctx *gin.Context) (string, error) {
 		return "", err
 	}
 
-	if time.Unix(expiredAt, 0).Sub(time.Now()) > 30*time.Second {
+	if time.Unix(expiredAt, 0).Sub(time.Now()) > 0 { // Can Only refresh after 30mins
 		err := errors.New("token can not be refreshed now")
-
-		ctx.AbortWithStatus(http.StatusBadRequest)
 
 		return "", err
 
 	}
 
-	//uid, err := strconv.ParseUint(fmt.Sprintf("%.0f", claims["user_id"]), 10, 32)
 	uid, err := strconv.ParseUint(fmt.Sprintf("%v", claims["user_id"]), 10, 32)
 
 	if err != nil {
@@ -154,8 +148,6 @@ func ParseToken(ctx *gin.Context) (*jwt.Token, error) {
 		if err == jwt.ErrSignatureInvalid {
 			err := errors.New("invalid Signature")
 
-			ctx.AbortWithStatus(http.StatusBadRequest)
-
 			return nil, err
 		}
 		return nil, err
@@ -164,8 +156,6 @@ func ParseToken(ctx *gin.Context) (*jwt.Token, error) {
 	// Check if the token is valid.
 	if !token.Valid {
 		err := errors.New("the token is not valid")
-
-		ctx.AbortWithStatus(http.StatusBadRequest)
 
 		return nil, err
 	}
